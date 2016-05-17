@@ -1,0 +1,28 @@
+{
+    "name": "baconmanager/rest-bundle",
+    "description": "This bundle of symfony2",
+    "keywords": ["Rest Bundle"],
+    "type": "symfony-bundle",
+    "license":      "MIT",
+    "authors": [
+        {
+            "name": "Adan Felipe Medeiros",
+            "email": "adan.grg@gmail.com"
+        },
+        {
+            "name": "Jonas Vieira Pereira",
+            "email": "jonasvpereira@gmail.com"
+        },
+        {
+            "name": "Mateus Guerra",
+            "email": "talk@mateusguerra.com"
+        }
+    ],
+    "require": {
+        "friendsofsymfony/rest-bundle": "*",
+        "jms/serializer-bundle" : "*"
+    },
+    "autoload": {
+        "psr-4": { "Bacon\\Bundle\\RestBundle\\": "" }
+    }
+}

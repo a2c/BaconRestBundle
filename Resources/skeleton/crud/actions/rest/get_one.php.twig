@@ -1,0 +1,28 @@
+
+    /**
+{% block phpdoc_method_header %}
+     * Finds and displays a {{ entity }} entity.
+{% endblock phpdoc_method_header %}
+     *
+{% block phpdoc_method_annotations %}
+{% if 'annotation' == format %}
+     * @GET("/{id}", name="{{ route_name_prefix }}_show")
+{% endif %}
+{% endblock phpdoc_method_annotations %}
+     */
+{% block method_definition %}
+    public function getOneAction(Request $request, $id)
+{% endblock method_definition %}
+    {
+{% block method_body %}
+        $entity = $this->getDoctrine()->getRepository('{{ bundle }}:{{ entity }}')->find($id);
+
+        if (!$entity) {
+            return $this->view('The registry not Found', 404);
+        }
+{% endblock method_body %}
+
+{% block method_return %}
+        return $this->view($entity);
+{% endblock method_return %}
+    }

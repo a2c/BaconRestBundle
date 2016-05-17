@@ -1,0 +1,38 @@
+
+    /**
+{% block phpdoc_method_header %}
+     * Creates a new {{ entity }} entity.
+{% endblock phpdoc_method_header %}
+     *
+{% block phpdoc_method_annotations %}
+{% if 'annotation' == format %}
+     * @Post("", name="{{ route_name_prefix }}_create")
+{% endif %}
+{% endblock phpdoc_method_annotations %}
+     */
+{% block method_definition %}
+    public function postAction(Request $request)
+{% endblock method_definition %}
+    {
+{% block method_body %}
+
+        {# $entity = new {{ entity }}();
+
+        $entity = $this->process($request, $entity); #}
+
+        $entity = $this->saveEntity({{ entity }}::class, $request);
+
+        if (!$entity) {
+            return $this->view('Error',400);
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($entity);
+        $em->flush();
+
+{% endblock method_body %}
+
+{% block method_return %}
+        return $this->view($entity,201);
+{% endblock method_return %}
+    }

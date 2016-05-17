@@ -1,0 +1,40 @@
+
+    /**
+{% block phpdoc_method_header %}
+     * Edits an existing {{ entity }} entity.
+{% endblock phpdoc_method_header %}
+     *
+{% block phpdoc_method_annotations %}
+{% if 'annotation' == format %}
+     * @Put("/{id}", name="{{ route_name_prefix }}_update")
+{% endif %}
+{% endblock phpdoc_method_annotations %}
+     */
+{% block method_definition %}
+    public function putAction(Request $request, $id)
+{% endblock method_definition %}
+    {
+{% block method_body %}
+        $entity = $this->getDoctrine()->getRepository('{{ bundle }}:{{ entity }}')->find($id);
+
+        if (!$entity) {
+            return $this->view('Registry not Found',404);
+        }
+
+        $newEntity = $this->saveEntity({{ entity }}::class, $request, $entity->getId());
+
+        if (!$newEntity) {
+            return $this->view('Error',400);
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->merge($newEntity);
+        $em->flush();
+
+        {# $entity = $this->process($request, $entity); #}
+        
+{% endblock method_body %}
+{% block method_return %}
+        return $this->view($entity);
+{% endblock method_return %}
+    }

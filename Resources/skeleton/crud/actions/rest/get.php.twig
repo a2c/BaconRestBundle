@@ -1,0 +1,39 @@
+
+    /**
+{% block phpdoc_method_header %}
+     * Lists all {{ entity }} entities.
+{% endblock phpdoc_method_header %}
+     *
+{% block phpdoc_method_annotations %}
+{% if 'annotation' == format %}
+     * @Get("", name="{{ route_name_prefix }}", defaults={"page"=1, "sort"="id", "direction"="asc"})
+     * @Get("/page/{page}", defaults={"page"=1, "sort"="id", "direction"="asc"}, name="{{ route_name_prefix }}_pagination")
+     * @Get("/page/{page}/sort/{sort}/direction/{direction}/", defaults={"page"=1, "sort"="id", "direction"="asc"}, name="{{ route_name_prefix }}_pagination_sort")
+{% endif %}
+{% endblock phpdoc_method_annotations %}
+     */
+{% block method_definition %}
+    public function getAction(Request $request, $page = 1, $sort = 'id', $direction = 'asc')
+{% endblock method_definition %}
+    {
+{% block method_body %}
+        $entity = new {{ entity }}();
+        $query = $this->getDoctrine()->getRepository('{{ bundle }}:{{ entity }}')->getQueryPagination($entity,$sort,$direction);
+
+        $perPage = 10;
+
+        if(defined('{{ entity }}::PER_PAGE')) {
+            $perPage = {{ entity }}::PER_PAGE;
+        }
+
+        $paginator = $this->get('knp_paginator')->paginate(
+            $query,
+            $page,
+            $perPage
+        )->getItems();
+
+{% endblock method_body %}
+{% block method_return %}
+        return $this->view($paginator);
+{% endblock method_return %}
+    }

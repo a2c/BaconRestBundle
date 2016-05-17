@@ -62,7 +62,6 @@ class DoctrineRestGenerator extends BaseGenerator
         $this->bundle = $bundle;
         $this->metadata = $metadata;
         $this->setFormat($format);
-        
         $this->generateRestControllerClass($forceOverwrite);
         $this->generateEntityRepository($metadata);
     }
@@ -165,14 +164,15 @@ class DoctrineRestGenerator extends BaseGenerator
     {
         $parts = explode('\\', $this->entity);
         $entityClass = array_pop($parts);
-        $entityNamespace = implode('\\', $parts);
         $target = $this->bundle->getPath() . '/Repository/' . $entityClass . 'Repository.php';
-        $this->renderFile('crud/repository/repository.php.twig', $target, array(
-            'fields'            => $this->metadata->fieldMappings,
-            'bundle'            => $this->bundle->getName(),
-            'entity'            => $this->entity,
-            'entity_class'      => $entityClass,
-            'namespace'         => $this->bundle->getNamespace(),
-        ));
+        if(!file_exists($target)) {
+            $this->renderFile('crud/repository/repository.php.twig', $target, array(
+                'fields'            => $this->metadata->fieldMappings,
+                'bundle'            => $this->bundle->getName(),
+                'entity'            => $this->entity,
+                'entity_class'      => $entityClass,
+                'namespace'         => $this->bundle->getNamespace(),
+            ));
+        }
     }
 }

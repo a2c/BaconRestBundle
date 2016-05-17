@@ -2,17 +2,13 @@
 
 namespace Bacon\Bundle\RestBundle\Controller;
 
-use Bacon\Bundle\CoreBundle\Controller\BaseController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations\Post;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Uecode\Bundle\ApiKeyBundle\Util\ApiKeyGenerator;
 
 class AuthController extends BaseController
 {
-
     /**
      * Rest Login
      *
@@ -24,46 +20,66 @@ class AuthController extends BaseController
         $password = $request->get('password',NULL);
 
         if (!isset($username) || !isset($password)){
-
-            $return = array(
-                'type' => 'error',
-                'message' => "You must pass username and password fields"
-            );
-
-            return $this->view($return, 400);
+            return $this->errorBadParameters();
         }
 
-        $um = $this->get('fos_user.user_manager');
-        $user = $um->findUserByUsernameOrEmail($username);
+        $userManager = $this->get('fos_user.user_manager');
+        $user = $userManager->findUserByUsernameOrEmail($username);
 
         if (!$user instanceof \Bacon\Custom\UserBundle\Entity\User) {
-
-            $return = array(
-                'type' => 'error',
-                'message' => "No matching user account found"
-            );
-
-            return $this->view($return, 404);
+            return $this->errorUserNotFound();
         }
 
+        return $this->registerUser($user, $password);
+    }
+
+    private function errorBadParameters()
+    {
+        $return = array(
+            'type' => 'error',
+            'message' => "You must pass username and password fields"
+        );
+
+        return $this->view($return, 400);
+    }
+
+    private function errorUserNotFound()
+    {
+        $return = array(
+            'type' => 'error',
+            'message' => "No matching user account found"
+        );
+
+        return $this->view($return, 404);
+    }
+
+    private function errorPasswordMatch()
+    {
+        $return = array(
+            'type' => 'error',
+            'message' => "Password does not match password on record"
+        );
+
+        return $this->view($return, 400);
+    }
+
+    private function registerUser($user, $password)
+    {
         $factory = $this->get('security.encoder_factory');
         $encoder = $factory->getEncoder($user);
 
         $bool = ($encoder->isPasswordValid($user->getPassword(),$password,$user->getSalt())) ? true : false;
         if (!$bool) {
 
-            $return = array(
-                'type' => 'error',
-                'message' => "Password does not match password on record"
-            );
-
-            return $this->view($return, 400);
+            return $this->errorPasswordMatch();
         }
 
-        $user->setApiKey(ApiKeyGenerator::generate());
-        $em = $this->getDoctrine()->getEntityManager();
-        $em->persist($user);
-        $em->flush();
+        $generator = new ApiKeyGenerator();
+        $user->setApiKey($generator->generateApiKey());
+        
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
 
         $return = array(
             "type" => "success",
@@ -72,7 +88,5 @@ class AuthController extends BaseController
 
         return $this->view($return, 200);
     }
-
-
 
 }

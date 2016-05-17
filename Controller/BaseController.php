@@ -19,7 +19,8 @@ class BaseController extends FOSRestController
     protected function getContext($groups)
     {
         $groups[] = 'base';
-        $context = SerializationContext::create();
+        $serializerContext = new SerializationContext();
+        $context = $serializerContext->create();
         return $context->setGroups($groups);
     }
 
@@ -45,10 +46,10 @@ class BaseController extends FOSRestController
         return preg_replace($patterns, $replacements,$string);
     }
     
-    protected function saveEntity($entityName, $request, $id = null)
+    protected function saveEntity($entityName, $request, $identifier = null)
     {
-        if ($id) {
-           $request->request->add(array('id' => $id));
+        if ($identifier) {
+           $request->request->add(array('id' => $identifier));
         }
 
         $data = json_encode($request->request->all());

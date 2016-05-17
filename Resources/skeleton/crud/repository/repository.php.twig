@@ -1,0 +1,76 @@
+<?php
+{% set alias = entity|lower|first %}
+namespace {{ namespace }}\Repository;
+
+{% block use_statements %}
+use Doctrine\ORM\EntityRepository;
+use {{ namespace }}\Entity\{{ entity_class }};
+{% endblock use_statements %}
+
+/**
+ * {{ entity_class }} Repository.
+*/
+{% block class_definition %}
+class {{ entity_class }}Repository extends EntityRepository
+{% endblock class_definition %}
+{
+{% block class_body %}
+    /**
+    * Search for records based on an entity
+    *
+    */
+    public function getQueryPagination({{ entity_class }} $entity, $sort, $direction)
+    {
+
+        $queryBuilder = $this->createQueryBuilder('{{ alias }}');
+
+        $data = [
+    {% for field in fields %}
+        '{{ field.columnName }}' => $entity->get{{ field.fieldName|first|upper }}{{ field.fieldName|slice(1) }}(),
+    {% endfor %}
+    ];
+
+    {%- for field in fields %}
+
+
+        if (!empty($data['{{ field.columnName }}'])) {
+        {% if field.type == 'date' -%}
+            $queryBuilder
+            ->andWhere($queryBuilder->expr()->gte('{{ alias }}.{{ field.columnName }}', ':{{ field.columnName }}'))
+            ->setParameter('{{ field.columnName }}', $data['{{ field.columnName }}'])
+            ;
+        {% elseif field.type == 'string' %}
+    $queryBuilder
+                ->andWhere($queryBuilder->expr()->like('{{ alias }}.{{ field.columnName }}', ':{{ field.columnName }}'))
+                ->setParameter('{{ field.columnName }}', "%{$data['{{ field.columnName }}']}%")
+            ;
+        {% else %}
+    $queryBuilder
+                ->andWhere($queryBuilder->expr()->eq('{{ alias }}.{{ field.columnName }}', ':{{ field.columnName }}'))
+                ->setParameter('{{ field.columnName }}', $data['{{ field.columnName }}'])
+            ;
+        {% endif -%}
+
+        }
+
+    {%- endfor %}
+
+
+        return $queryBuilder
+            ->orderBy('{{ alias }}.'.$sort, $direction)
+            ->getQuery()
+        ;
+    }
+
+    public function getBatchDeleteQuery($ids) 
+    {
+        $queryBuilder = $this->createQueryBuilder('e');
+
+        $queryBuilder->add('where', $queryBuilder->expr()->in('e.id', ':ids'))
+             ->setParameter('ids', $ids);
+
+        return $queryBuilder->getQuery();
+    }
+
+{% endblock class_body %}
+}

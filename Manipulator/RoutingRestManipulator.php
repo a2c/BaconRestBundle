@@ -63,11 +63,13 @@ class RoutingRestManipulator extends Manipulator
             mkdir($dir, 0777, true);
         }
 
+        $resource = sprintf("    resource: \"@%s/Resources/config/%s.%s\"\n", $bundle, $path, $format);
+        
         if ('annotation' == $format) {
-            $code .= sprintf("    resource: \"@%s/Controller/\"\n    type:     annotation\n", $bundle);
-        } else {
-            $code .= sprintf("    resource: \"@%s/Resources/config/%s.%s\"\n", $bundle, $path, $format);
-        }
+            $resource = sprintf("    resource: \"@%s/Controller/\"\n    type:     annotation\n", $bundle);
+        } 
+        
+        $code .= $resource;
         $code .= sprintf("    prefix:   %s\n", $prefix);
         $code .= "\n";
         $code .= $current;

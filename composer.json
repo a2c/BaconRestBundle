@@ -19,8 +19,8 @@
         }
     ],
     "require": {
-        "friendsofsymfony/rest-bundle": "*",
-        "jms/serializer-bundle" : "*"
+        "friendsofsymfony/rest-bundle": "1.7.8",
+        "jms/serializer-bundle" : "1.1.0"
     },
     "autoload": {
         "psr-4": { "Bacon\\Bundle\\RestBundle\\": "" }
